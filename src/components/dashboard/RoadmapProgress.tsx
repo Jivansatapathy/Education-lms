@@ -1,5 +1,6 @@
+import React from "react";
 import { motion } from "framer-motion";
-import { Target, CheckCircle2, Circle } from "lucide-react";
+import { Target, CheckCircle2, Circle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { jobRoles, courses } from "@/data/mockData";
 import { User } from "@/contexts/AuthContext";
@@ -21,47 +22,72 @@ export const RoadmapProgress = ({ user }: RoadmapProgressProps) => {
     const completedIds = user.completedCourseIds || [];
 
     const roadmapCourses = roadmapCourseIds.map(id => {
-        return courses.find(c => c.id === id) || { id, title: "Upcoming Course", completed: false };
+        const found = courses.find(c => c.id === id);
+        return found ? {
+            id: found.id,
+            title: found.title,
+            completed: completedIds.includes(found.id)
+        } : { id, title: "Specialized Module", completed: false };
     });
 
     const completedCount = roadmapCourseIds.filter(id => completedIds.includes(id)).length;
     const progress = Math.round((completedCount / roadmapCourseIds.length) * 100);
 
     return (
-        <motion.div variants={fadeUp} className="bg-card rounded-xl p-5 border border-border shadow-card space-y-4">
+        <motion.div variants={fadeUp} className="bg-[#121214] rounded-2xl p-6 border border-white/5 shadow-2xl space-y-5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-foreground text-sm">Career Roadmap: {jobRole.title}</h3>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                        <Target className="w-5 h-5" />
+                    </div>
+                    <div className="flex flex-col">
+                        <h3 className="font-bold text-white text-sm tracking-tight">{jobRole.title}</h3>
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Career Trajectory</span>
+                    </div>
                 </div>
-                <Link to="/roadmap" className="text-[10px] text-accent hover:underline font-bold uppercase tracking-tighter">
-                    Full View
+                <Link to="/roadmap" className="p-2 rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-all">
+                    <ArrowRight className="w-4 h-4" />
                 </Link>
             </div>
 
-            <Progress value={progress} className="h-2" />
+            <div className="space-y-2">
+                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-white/40">Efficiency</span>
+                    <span className="text-primary">{progress}%</span>
+                </div>
+                <Progress value={progress} className="h-1.5 bg-white/5" />
+            </div>
 
-            <div className="space-y-3 mt-4">
-                {roadmapCourses.map((course, index) => {
+            <div className="space-y-2.5 pt-2">
+                {roadmapCourses.slice(0, 3).map((course, index) => {
                     const isCompleted = completedIds.includes(course.id);
                     const isNext = !isCompleted && (index === 0 || completedIds.includes(roadmapCourses[index - 1].id));
 
                     return (
-                        <div key={course.id} className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${isNext ? "bg-primary/5 border border-primary/20" : ""}`}>
+                        <div key={course.id} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${isNext ? "bg-white/5 border border-primary/20 shadow-lg" : "bg-transparent opacity-60"}`}>
                             {isCompleted ? (
                                 <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                             ) : (
-                                <Circle className={`w-4 h-4 flex-shrink-0 ${isNext ? "text-primary animate-pulse" : "text-muted-foreground"}`} />
+                                <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${isNext ? "border-primary" : "border-white/10"}`}>
+                                    {isNext && <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
+                                </div>
                             )}
-                            <div className="min-w-0">
-                                <p className={`text-xs font-medium truncate ${isCompleted ? "text-muted-foreground line-through" : "text-foreground"}`}>
-                                    {(course as any).title}
+                            <div className="min-w-0 flex-1">
+                                <p className={`text-[11px] font-bold truncate ${isCompleted ? "text-white/30" : "text-white/90"}`}>
+                                    {course.title}
                                 </p>
-                                {isNext && <span className="text-[10px] text-primary font-bold uppercase tracking-tighter">Recommended Next</span>}
+                                {isNext && <span className="text-[8px] text-primary font-black uppercase tracking-widest">AI Recommendation</span>}
                             </div>
                         </div>
                     );
                 })}
+                {roadmapCourses.length > 3 && (
+                    <p className="text-[10px] text-white/20 text-center font-bold uppercase tracking-widest pt-2">
+                        + {roadmapCourses.length - 3} more modules in path
+                    </p>
+                )}
             </div>
         </motion.div>
     );
