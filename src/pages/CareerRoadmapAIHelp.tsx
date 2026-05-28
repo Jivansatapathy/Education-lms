@@ -124,10 +124,13 @@ const CareerRoadmapAIHelp = () => {
                     data?.recommendedCourseId ?? data?.topPick?.courseId ?? rankedLocal[0]?.course.id;
                 const recommended = selectedCourses.find((c) => String(c.id) === String(recommendedId));
 
+                const hasRanked = Array.isArray(data?.ranked) && data.ranked.length > 0;
                 if (data?.answer) {
                     setAiAnswer(data.answer);
                 } else if (recommended) {
                     setAiAnswer(`Start with "${recommended.title}" to build the strongest foundation for your selected path.`);
+                } else if (hasRanked) {
+                    setAiAnswer("Here is a suggested study order for your selected courses.");
                 } else {
                     throw new Error("Invalid recommend response");
                 }

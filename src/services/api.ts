@@ -1,24 +1,6 @@
-// API service functions for LMS frontend
-// In dev, use relative /api (proxied by Vite to backend); in prod use full URL.
-// If VITE_API_URL is "http://localhost:3001" (no /api), requests would go to /auth/... → 404.
-// We append /api only for origin-style URLs; leave custom paths unchanged.
-function getApiBaseUrl(): string {
-  const raw = import.meta.env.VITE_API_URL?.trim();
-  if (!raw) {
-    return import.meta.env.DEV ? "/api" : "http://localhost:3001/api";
-  }
-  const base = raw.replace(/\/$/, "");
-  if (base.endsWith("/api")) return base;
-  try {
-    const parsed = new URL(base.includes("://") ? base : `http://${base}`);
-    const path = parsed.pathname.replace(/\/$/, "") || "";
-    if (path && path !== "/") return base;
-  } catch {
-    /* fall through */
-  }
-  return `${base}/api`;
-}
+import { getApiBaseUrl } from "@/config/apiBase";
 
+// API service functions for LMS frontend
 const API_BASE_URL = getApiBaseUrl();
 
 // Helper function to get auth token (checks both localStorage and sessionStorage for Remember me)
